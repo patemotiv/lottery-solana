@@ -1,0 +1,46 @@
+@startuml system
+
+actor "Player" as Player
+actor "Game Creator" as GameCreator
+boundary "Web Interface" as WebInterface
+control "Solana Blockchain" as SolanaBlockchain
+database "Game State" as GameState
+database "Player Data" as PlayerData
+database "Token Accounts" as TokenAccounts
+
+GameCreator -> WebInterface : Access Game Creation Interface
+WebInterface -> SolanaBlockchain : Create Game
+SolanaBlockchain -> GameState : Initialize Game Account
+SolanaBlockchain -> TokenAccounts : Fund Game Account
+
+Player -> WebInterface : Buy Ticket
+WebInterface -> SolanaBlockchain : Buy Ticket
+SolanaBlockchain -> GameState : Update Game State
+SolanaBlockchain -> TokenAccounts : Deduct SOL for Ticket
+SolanaBlockchain -> PlayerData : Store Ticket Purchase
+
+SolanaBlockchain -> GameState : Check Game Duration
+SolanaBlockchain -> SolanaBlockchain : End Game
+SolanaBlockchain -> GameState : Update Game State
+
+SolanaBlockchain -> GameState : Draw Winner
+SolanaBlockchain -> PlayerData : Store Winner Information
+
+Player -> WebInterface : Claim Prize
+WebInterface -> SolanaBlockchain : Claim Prize
+SolanaBlockchain -> TokenAccounts : Transfer Prize SOL
+SolanaBlockchain -> PlayerData : Store Claimed Prize
+
+GameCreator -> WebInterface : Create New Game (if previous game ended)
+WebInterface -> SolanaBlockchain : Create New Game
+SolanaBlockchain -> GameState : Initialize New Game Account
+SolanaBlockchain -> TokenAccounts : Fund New Game Account
+
+Player -> WebInterface : View Game Status
+GameCreator -> WebInterface : View Game Status
+WebInterface -> SolanaBlockchain : Fetch Game Data
+SolanaBlockchain -> GameState : Retrieve Game State
+SolanaBlockchain -> PlayerData : Retrieve Player Data
+SolanaBlockchain -> TokenAccounts : Retrieve Token Balances
+
+@enduml
