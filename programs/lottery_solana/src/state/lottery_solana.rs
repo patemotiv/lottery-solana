@@ -2,18 +2,25 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct Game {
-    pub owner: Pubkey,
-    pub end_time: i64,
-    pub prize_pool: u64,
-    pub total_tickets: u32,
-    pub winner: Option<Pubkey>,
-    pub winner_withdrawn: bool,
+    pub owner: Pubkey, // 32
+    pub end_time: i64,  // 8
+    pub prize_pool: u64, // 8
+    pub total_tickets: u32, // 4
+    pub winner: Option<Pubkey>, // 1 + 32
+    pub winner_withdrawn: bool, // 1
 }
 
 #[account]
 pub struct Ticket {
-    pub owner: Pubkey,
-    pub id: u32,
+    pub owner: Pubkey,  // 32
+    pub id: u32, // 4
+}
+
+#[account]
+pub struct Player {
+    pub player: Pubkey, // 32
+    pub amount: u64, // 8
+    pub ticket_count: u32, // 4
 }
 
 // Helper function to check if the game has ended
