@@ -58,7 +58,7 @@ pub struct BuyTicket<'info> {
         init, 
         seeds = [
             game.key().as_ref(),
-            &game.total_tickets.to_be_bytes()
+            &game.total_tickets.to_ne_bytes()
         ], 
         constraint = player.to_account_info().lamports() >= TICKET_PRICE,
         bump, 
