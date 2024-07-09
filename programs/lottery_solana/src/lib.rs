@@ -15,11 +15,23 @@ declare_id!("HsKw5odRfszH8rUUU5RYzxBS3KwSG3Yiy3BxX67GcJb2");
 pub mod lottery_solana {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
-        Ok(())
+    pub fn create_game(ctx: Context<CreateGame>, end_time: i64) -> Result<()> {
+        _create_game(ctx, end_time)
+    }
+
+    pub fn buy_ticket(ctx: Context<BuyTicket>) -> Result<()> {
+        _buy_ticket(ctx)
+    }
+
+    pub fn pick_winner(ctx: Context<PickWinner>) -> Result<()> {
+        _pick_winner(ctx)
+    }
+
+    pub fn winner_withdraw(ctx: Context<WinnerWithdraw>) -> Result<()> {
+        _winner_withdraw(ctx)
+    }
+
+    pub fn reset_game(ctx: Context<ResetGame>) -> Result<()> {
+        _reset_game(ctx)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}
