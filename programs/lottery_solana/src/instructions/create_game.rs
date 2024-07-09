@@ -3,14 +3,14 @@ use crate::{
     state::Game,
     GAME_ACCOUNT_SEED,
     error::ErrorCode,
-    is_end_time_valid
+    _is_end_time_valid
 };
 
 pub fn _create_game(ctx: Context<CreateGame>, end_time: i64) -> Result<()> {
     let game = &mut ctx.accounts.game;
     let creator = &ctx.accounts.creator;
 
-    require!(is_end_time_valid(end_time) == true, ErrorCode::InvalidGameEndTime);
+    require!(_is_end_time_valid(end_time) == true, ErrorCode::InvalidGameEndTime);
 
     // Initialize Game account fields
     game.creator = creator.key();
@@ -28,7 +28,7 @@ pub struct CreateGame<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 + 8 + 8 + 4 + 4 + 8 + 1 + 1 + 8,
+        space = 32 + 8 + 8 + 4 + 1 + 32 + 1 + 8,
         seeds = [GAME_ACCOUNT_SEED.as_bytes(), creator.key().as_ref()],
         bump
     )]

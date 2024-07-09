@@ -29,7 +29,7 @@ pub fn _has_game_ended(game: &Game) -> bool {
     (game.end_time == 0) || (clock.unix_timestamp >= game.end_time)
 }
 
-pub fn is_end_time_valid(end_time : i64) -> bool {
+pub fn _is_end_time_valid(end_time : i64) -> bool {
     // Check if the provided end_time is in the future
     let clock = Clock::get().unwrap();
     end_time > clock.unix_timestamp 

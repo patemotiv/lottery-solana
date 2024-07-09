@@ -13,13 +13,13 @@ pub fn _winner_withdraw(ctx: Context<WinnerWithdraw>) -> Result<()> {
     let owner = &ctx.accounts.owner;
 
     msg!("game: {:?}", game.key());
-    msg!("game.owner: {:?}", game.owner);
+    msg!("game.owner: {:?}", game.creator);
     msg!("game.winner: {:?}", game.winner);
     msg!("winner.key: {:?}", winner.key());
     msg!("owner.key: {:?}", owner.key());
 
     require!(_has_game_ended(game), ErrorCode::GameNotEnded);
-    require!(game.owner == owner.key(), ErrorCode::Unauthorized);
+    require!(game.creator == owner.key(), ErrorCode::Unauthorized);
     require!(game.winner == Some(winner.key()), ErrorCode::Unauthorized);
     require!(game.winner_withdrawn == false, ErrorCode::WinnerAlreadyWithdrawn);
 
