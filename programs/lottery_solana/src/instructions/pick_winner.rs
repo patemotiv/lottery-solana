@@ -30,6 +30,7 @@ pub fn _pick_winner(ctx: Context<PickWinner>) -> Result<()> {
         &[game.key().as_ref(), winning_ticket_id.to_ne_bytes().as_ref()],
         &ctx.program_id
     );
+    msg!("winning_ticket_pda: {:?}", winning_ticket_pda);
 
     // Get the account info for the winning ticket PDA
     let winning_ticket_account_info = ctx.remaining_accounts.iter().find(
@@ -41,6 +42,8 @@ pub fn _pick_winner(ctx: Context<PickWinner>) -> Result<()> {
     // Now find the player who owns the winning ticket
     let winning_ticket = Ticket::try_from_slice(&winning_ticket_account_info.data.borrow())?;
 
+    // Set the winner of the game
+    msg!("winner: {:?}", winning_ticket.owner);
     game.winner = Some(winning_ticket.owner);
 
     Ok(())
