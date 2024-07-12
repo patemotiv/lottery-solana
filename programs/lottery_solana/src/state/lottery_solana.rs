@@ -23,6 +23,12 @@ pub struct Player {
     pub ticket_count: u32, // 4
 }
 
+#[account]
+pub struct Creator {
+    pub creator: Pubkey, // 32
+    pub game_count: u32, // 4
+}
+
 // Helper function to check if the game has ended
 pub fn _has_game_ended(game: &Game) -> bool {
     let clock = Clock::get().unwrap();

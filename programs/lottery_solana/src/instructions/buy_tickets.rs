@@ -1,9 +1,12 @@
 use anchor_lang::prelude::*;
+use std::mem::size_of;
 use crate::{
     state::Game,
     state::Ticket,
     state::Player,
     error::ErrorCode,
+    PLAYER_ACCOUNT_SEED,
+    TICKET_ACCOUNT_SEED,
     TICKET_PRICE,
     _has_game_ended};
 
@@ -55,27 +58,29 @@ pub fn _buy_ticket(ctx: Context<BuyTicket>) -> Result<()> {
 #[derive(Accounts)]
 pub struct BuyTicket<'info> {
     #[account(
-        init, 
+        init,
+        payer = player, 
+        space = size_of::<Ticket>() + 8,
         seeds = [
+            TICKET_ACCOUNT_SEED.as_bytes(),
             game.key().as_ref(),
             &game.total_tickets.to_ne_bytes()
         ], 
         constraint = player.to_account_info().lamports() >= TICKET_PRICE,
-        bump, 
-        payer = player, 
-        space = 32 + 4 + 8,
+        bump,
     )]
     pub ticket: Account<'info, Ticket>,
 
     #[account(
         init,
+        payer = player,
+        space = size_of::<Player>() + 8,
         seeds = [
+            PLAYER_ACCOUNT_SEED.as_bytes(),
             game.key().as_ref(),
             player.key().as_ref()
         ],
         bump,
-        payer = player,
-        space = 32 + 8 + 4 + 8,
     )]
     pub player_stats: Account<'info, Player>,
 

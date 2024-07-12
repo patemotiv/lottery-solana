@@ -15,6 +15,10 @@ declare_id!("HsKw5odRfszH8rUUU5RYzxBS3KwSG3Yiy3BxX67GcJb2");
 pub mod lottery_solana {
     use super::*;
 
+    pub fn initialize_creator(ctx: Context<InitializeCreator>) -> Result<()> {
+        _initialize_creator(ctx)
+    }
+
     pub fn create_game(ctx: Context<CreateGame>, end_time: i64) -> Result<()> {
         _create_game(ctx, end_time)
     }
