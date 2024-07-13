@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program, AnchorProvider } from "@coral-xyz/anchor";
-import { Keypair, SystemProgram } from "@solana/web3.js";
+import { PublicKey, Keypair, SystemProgram } from "@solana/web3.js";
 import { LotterySolana } from "../target/types/lottery_solana";
 import { expect } from "chai";
 
@@ -9,7 +9,6 @@ describe("create_game", () => {
   anchor.setProvider(provider);
   const program = anchor.workspace.LotterySolana as Program<LotterySolana>;
 
-  const gameAccount = Keypair.generate();
   const creatorAcc = Keypair.generate();
 
   before(async () => {
@@ -36,7 +35,7 @@ describe("create_game", () => {
     });
 
     // Initialize creatorAcc account
-    await program.methods
+    const tx = await program.methods
       .initializeCreator()
       .accounts({
         creatorAcc: creatorAcc.publicKey,
@@ -45,19 +44,42 @@ describe("create_game", () => {
       })
       .signers([creatorAcc])
       .rpc();
+
+      console.log(`Use 'solana confirm -v ${tx}' to see the logs`);
+
+      latestBlockHash = await provider.connection.getLatestBlockhash();
+
+      await provider.connection.confirmTransaction({
+        signature: tx,
+        blockhash: latestBlockHash.blockhash,
+        lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
+      });
   });
 
   it("initializes the game account correctly with valid end time", async () => {
+
+    const counterData = await provider.connection.getAccountInfo(creatorAcc.publicKey);
+      // Assuming game_count is at offset 32 (adjust if different)
+    const gameCount = counterData.data.readUInt32LE(32);
+
+    const [gamePDA, bump] = await PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("game_account"),
+        provider.wallet.publicKey.toBuffer(),
+        Buffer.from(gameCount.toString()), // Convert gameCount to buffer
+      ],
+      program.programId
+    );
+
     // Create transaction for creating the game account
     const tx = await program.methods
       .createGame(Math.floor(Date.now() / 1000) + 3600) // One hour from now
       .accounts({
-        game: gameAccount.publicKey,
+        game: gamePDA,
         creatorAcc: creatorAcc.publicKey,
         creator: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       })
-      .signers([gameAccount])
       .rpc();
 
     const latestBlockHash = await provider.connection.getLatestBlockhash();
