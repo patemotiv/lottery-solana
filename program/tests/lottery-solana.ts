@@ -16,8 +16,6 @@ describe("Tests for lottery_solana", () => {
   const LAMPORTS_PER_SOL = 1000000000;
   const TICKET_PRICE = parseInt(program.idl.constants.find(x => x.name == "ticketPrice").value);
 
-  let ticketAccounts: PublicKey[] = [];
-
   before(async () => {
     // Allocate space for the game account (adjust size as needed)
     const lamportsForCreator = await provider.connection.getMinimumBalanceForRentExemption(
@@ -162,8 +160,6 @@ describe("Tests for lottery_solana", () => {
       program.programId
     );
 
-    ticketAccounts.push(ticketPDA);
-
     const [playerPDA] = PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("player_account"),
@@ -188,7 +184,7 @@ describe("Tests for lottery_solana", () => {
       .signers([player1])
       .rpc();
 
-    console.log(ticketPDA.toBase58());
+    console.log("Player 1 ticket: " + ticketPDA.toBase58());
 
     // Fetch the ticket account data using the fetch method
     const ticket = await program.account.ticket.fetch(ticketPDA);
@@ -249,8 +245,6 @@ describe("Tests for lottery_solana", () => {
       program.programId
     );
 
-    ticketAccounts.push(ticketPDA);
-
     const [playerPDA] = PublicKey.findProgramAddressSync(
       [
         anchor.utils.bytes.utf8.encode("player_account"),
@@ -280,7 +274,8 @@ describe("Tests for lottery_solana", () => {
     const playerStats = await program.account.player.fetch(playerPDA);
     const game = await program.account.game.fetch(gamePDA);
 
-    console.log(ticketPDA.toBase58());
+    console.log("Player 2 ticket: " + ticketPDA.toBase58());
+
     // Verify the ticket data
     expect(ticket.owner.toBase58()).to.equal(player2.publicKey.toBase58());
     expect(ticket.id).to.equal(1);
@@ -323,19 +318,12 @@ describe("Tests for lottery_solana", () => {
 
     await new Promise(resolve => setTimeout(resolve, 10000));
 
-    const accountMetas: anchor.web3.AccountMeta[] = ticketAccounts.map(publicKey => ({
-      pubkey: publicKey,
-      isSigner: false,
-      isWritable: false,
-    }));
-
     const tx = await program.methods
       .pickWinner()
       .accounts({
         game: gamePDA,
         systemProgram: SystemProgram.programId,
       })
-      .remainingAccounts(accountMetas)
       .rpc();
 
     await provider.connection.confirmTransaction(tx);
@@ -346,7 +334,7 @@ describe("Tests for lottery_solana", () => {
     // Assert winner is set but haven't withdrawn yet
     expect(updatedGame.winnerTicket).to.not.be.null;
     expect(updatedGame.winnerWithdrawn).to.be.false;
-    console.log(`Winner is: ${updatedGame.winnerTicket}`);
+    console.log(`Winner is: ${updatedGame.winnerTicket.toBase58()}`);
   });
 
   it("Withdraws the winner's prize correctly", async () => {
@@ -373,10 +361,10 @@ describe("Tests for lottery_solana", () => {
     );
 
     const winnerTicket = (await program.account.game.fetch(gamePDA)).winnerTicket;
-    const playerThatWon = (await program.account.ticket.fetch(winnerTicket)).owner;
+    const playerThatWon = ((await program.account.ticket.fetch(winnerTicket)).owner == player1.publicKey) ? player1 : player2;
 
     // Fetch initial balances
-    const initialWinnerBalance = await provider.connection.getBalance(playerThatWon);
+    const initialWinnerBalance = await provider.connection.getBalance(playerThatWon.publicKey);
     const initialOwnerBalance = await provider.connection.getBalance(provider.wallet.publicKey);
 
     const tx = await program.methods
@@ -384,7 +372,7 @@ describe("Tests for lottery_solana", () => {
       .accounts({
         game: gamePDA,
         winnerTicket: winnerTicket,
-        winner: playerThatWon,
+        winner: playerThatWon.publicKey,
         owner: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       })
@@ -400,7 +388,7 @@ describe("Tests for lottery_solana", () => {
     const updatedGame = await program.account.game.fetch(gamePDA);
 
     // Fetch updated balances
-    const updatedWinnerBalance = await provider.connection.getBalance(playerThatWon);
+    const updatedWinnerBalance = await provider.connection.getBalance(playerThatWon.publicKey);
     const updatedOwnerBalance = await provider.connection.getBalance(provider.wallet.publicKey);
 
     // Assertions

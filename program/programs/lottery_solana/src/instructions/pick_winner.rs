@@ -21,7 +21,7 @@ pub fn _pick_winner(ctx: Context<PickWinner>) -> Result<()> {
 
     // Generate a "random" number based on a hash
     let hash = Clock::get()?.unix_timestamp;
-    let winning_ticket_id = hash % game.total_tickets as i64;
+    let winning_ticket_id = (hash % game.total_tickets as i64) as u32;
 
     // Now find the Ticket PDA that has the winning ticket id
     // A ticket PDA is created with the game account and the ticket id as seeds
@@ -30,6 +30,7 @@ pub fn _pick_winner(ctx: Context<PickWinner>) -> Result<()> {
         &[TICKET_ACCOUNT_SEED.as_bytes(), game.key().as_ref(), winning_ticket_id.to_be_bytes().as_ref()],
         &ctx.program_id
     );
+
     msg!("winning_ticket_pda: {:?}", winning_ticket_pda);
 
     // Save the winning ticket of the game
