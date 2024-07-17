@@ -16,14 +16,27 @@ pub fn _winner_withdraw(ctx: Context<WinnerWithdraw>) -> Result<()> {
 
     msg!("game: {:?}", game.key());
     msg!("game.owner: {:?}", game.creator);
+<<<<<<< HEAD
     msg!("game.winner_ticket: {:?}", game.winner_ticket);
+=======
+    msg!("game.winning_ticket: {:?}", game.winning_ticket);
+>>>>>>> 5eef30c (Add test for pick winner and winner withdrawal)
     msg!("winner.key: {:?}", winner.key());
     msg!("owner.key: {:?}", owner.key());
 
+    let (winning_ticket_pda, _bump) = Pubkey::find_program_address(
+        &[TICKET_ACCOUNT_SEED.as_bytes(), game.key().as_ref(), winning_ticket_id.to_be_bytes().as_ref()],
+        &ctx.program_id
+    );
+    
     require!(_has_game_ended(game), ErrorCode::GameNotEnded);
     require!(game.creator == owner.key(), ErrorCode::Unauthorized);
+<<<<<<< HEAD
     require!(game.winner_ticket.is_some(), ErrorCode::WinnerNotPicked);
     require!(game.winner_ticket.unwrap() == winner_ticket.key(), ErrorCode::Unauthorized);
+=======
+    require!(game.winning_ticket == Some(winner.key()), ErrorCode::Unauthorized);
+>>>>>>> 5eef30c (Add test for pick winner and winner withdrawal)
     require!(game.winner_withdrawn == false, ErrorCode::WinnerAlreadyWithdrawn);
     require!(winner_ticket.owner == winner.key(), ErrorCode::Unauthorized);
 
@@ -61,7 +74,11 @@ pub struct WinnerWithdraw<'info> {
     #[account(mut)]
     pub game: Account<'info, Game>,
     #[account(mut)]
+<<<<<<< HEAD
     pub winner_ticket: Account<'info, Ticket>,
+=======
+    pub winning_ticket: Account<'info, Ticket>,
+>>>>>>> 5eef30c (Add test for pick winner and winner withdrawal)
     #[account(mut)]
     pub winner: Signer<'info>,
     #[account(mut)]
