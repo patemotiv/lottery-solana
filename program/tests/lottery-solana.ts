@@ -116,7 +116,7 @@ describe("Tests for lottery_solana", () => {
     expect(game.endTime.toNumber()).to.be.at.least(Math.floor(Date.now() / 1000));
     expect(game.prizePool.toNumber()).to.equal(0);
     expect(game.totalTickets).to.equal(0);
-    expect(game.winner).to.be.null;
+    expect(game.winnerTicket).to.be.null;
     expect(game.winnerWithdrawn).to.be.false;
 
     const counter = await program.account.creator.fetch(creatorPDA);
@@ -344,9 +344,9 @@ describe("Tests for lottery_solana", () => {
     const updatedGame = await program.account.game.fetch(gamePDA);
 
     // Assert winner is set but haven't withdrawn yet
-    expect(updatedGame.winningTicket).to.not.be.null;
+    expect(updatedGame.winnerTicket).to.not.be.null;
     expect(updatedGame.winnerWithdrawn).to.be.false;
-    console.log(`Winner is: ${updatedGame.winner}`);
+    console.log(`Winner is: ${updatedGame.winnerTicket}`);
   });
 
   it("Withdraws the winner's prize correctly", async () => {
@@ -372,19 +372,19 @@ describe("Tests for lottery_solana", () => {
       program.programId
     );
 
-    const winningTicket = (await program.account.game.fetch(gamePDA)).winningTicket;
-    const playerThatWon = (await program.account.ticket.fetch(winningTicket)).owner;
+    const winnerTicket = (await program.account.game.fetch(gamePDA)).winnerTicket;
+    const playerThatWon = (await program.account.ticket.fetch(winnerTicket)).owner;
 
     // Fetch initial balances
-    const initialWinnerBalance = await provider.connection.getBalance(winner);
+    const initialWinnerBalance = await provider.connection.getBalance(playerThatWon);
     const initialOwnerBalance = await provider.connection.getBalance(provider.wallet.publicKey);
 
     const tx = await program.methods
       .winnerWithdraw()
       .accounts({
         game: gamePDA,
-        winningTicket: winningTicket,
-        winner: playerThatWon
+        winnerTicket: winnerTicket,
+        winner: playerThatWon,
         owner: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       })
@@ -400,13 +400,8 @@ describe("Tests for lottery_solana", () => {
     const updatedGame = await program.account.game.fetch(gamePDA);
 
     // Fetch updated balances
-    const updatedWinnerBalance = await provider.connection.getBalance(winner);
+    const updatedWinnerBalance = await provider.connection.getBalance(playerThatWon);
     const updatedOwnerBalance = await provider.connection.getBalance(provider.wallet.publicKey);
-
-    const player1Balance = await provider.connection.getBalance(player1.publicKey);
-    const player2Balance = await provider.connection.getBalance(player2.publicKey);
-    console.log(player1Balance);
-    console.log(player2Balance)
 
     // Assertions
     expect(updatedGame.winnerWithdrawn).to.equal(true);

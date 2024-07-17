@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-lottery_solana = "5XL1aVpxSeQPq8WQnNAVgxs9XMGBf4NHaNVW3Gihq6xi"
+lottery_solana = "UFHtfH5b3QXDUSNwPnQyDBEkAJnd2nqWLZ9dKEgwbuL"
 
 [registry]
 url = "https://api.apr.dev"

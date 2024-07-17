@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 use crate::{
     state::Game,
     error::ErrorCode,
+    TICKET_ACCOUNT_SEED,
     _has_game_ended,
 };
 
