@@ -26,6 +26,9 @@ pub enum ErrorCode {
     #[msg("There are not enough participants in the game.")]
     NotEnoughParticipants,
 
+    #[msg("Winner has not been picked yet.")]
+    WinnerNotPicked,
+
     #[msg("Winner has already been picked.")]
     WinnerAlreadyPicked,
 

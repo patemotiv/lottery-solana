@@ -1,6 +1,7 @@
 use anchor_lang::{prelude::*, solana_program::native_token::LAMPORTS_PER_SOL};
 use crate::{
     state::Game,
+    state::Ticket,
     error::ErrorCode,
     _has_game_ended,
     GAME_FEE,
@@ -9,19 +10,22 @@ use crate::{
 pub fn _winner_withdraw(ctx: Context<WinnerWithdraw>) -> Result<()> {
     
     let game = &mut ctx.accounts.game;
+    let winner_ticket = &ctx.accounts.winner_ticket;
     let winner = &ctx.accounts.winner;
     let owner = &ctx.accounts.owner;
 
     msg!("game: {:?}", game.key());
     msg!("game.owner: {:?}", game.creator);
-    msg!("game.winner: {:?}", game.winner);
+    msg!("game.winner_ticket: {:?}", game.winner_ticket);
     msg!("winner.key: {:?}", winner.key());
     msg!("owner.key: {:?}", owner.key());
 
     require!(_has_game_ended(game), ErrorCode::GameNotEnded);
     require!(game.creator == owner.key(), ErrorCode::Unauthorized);
-    require!(game.winner == Some(winner.key()), ErrorCode::Unauthorized);
+    require!(game.winner_ticket.is_some(), ErrorCode::WinnerNotPicked);
+    require!(game.winner_ticket.unwrap() == winner_ticket.key(), ErrorCode::Unauthorized);
     require!(game.winner_withdrawn == false, ErrorCode::WinnerAlreadyWithdrawn);
+    require!(winner_ticket.owner == winner.key(), ErrorCode::Unauthorized);
 
     // Calculate the amount to be sent to the winner
     let amount_to_winner = (game.prize_pool as f64 * (1.0 - GAME_FEE) as f64) as u64;
@@ -56,6 +60,8 @@ pub fn _winner_withdraw(ctx: Context<WinnerWithdraw>) -> Result<()> {
 pub struct WinnerWithdraw<'info> {
     #[account(mut)]
     pub game: Account<'info, Game>,
+    #[account(mut)]
+    pub winner_ticket: Account<'info, Ticket>,
     #[account(mut)]
     pub winner: Signer<'info>,
     #[account(mut)]

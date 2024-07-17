@@ -6,7 +6,7 @@ pub struct Game {
     pub end_time: i64,  // 8
     pub prize_pool: u64, // 8
     pub total_tickets: u32, // 4
-    pub winner: Option<Pubkey>, // 1 + 32
+    pub winner_ticket: Option<Pubkey>, // 1 + 32
     pub winner_withdrawn: bool, // 1
 }
 

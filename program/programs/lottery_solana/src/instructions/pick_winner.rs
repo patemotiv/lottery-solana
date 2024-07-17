@@ -1,7 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::{
     state::Game,
-    state::Ticket,
     error::ErrorCode,
     _has_game_ended,
 };
@@ -14,7 +13,7 @@ pub fn _pick_winner(ctx: Context<PickWinner>) -> Result<()> {
     require!(_has_game_ended(game), ErrorCode::GameNotEnded);
 
     // Check if winner has already been picked
-    require!(game.winner == None, ErrorCode::WinnerAlreadyPicked);
+    require!(game.winner_ticket == None, ErrorCode::WinnerAlreadyPicked);
 
     // Check if there are enough participants
     require!(game.total_tickets > 0, ErrorCode::NotEnoughParticipants);
@@ -32,19 +31,8 @@ pub fn _pick_winner(ctx: Context<PickWinner>) -> Result<()> {
     );
     msg!("winning_ticket_pda: {:?}", winning_ticket_pda);
 
-    // Get the account info for the winning ticket PDA
-    let winning_ticket_account_info = ctx.remaining_accounts.iter().find(
-        |account_info| {
-            account_info.key == &winning_ticket_pda
-        }
-    ).ok_or(ProgramError::InvalidAccountData)?;
-
-    // Now find the player who owns the winning ticket
-    let winning_ticket = Ticket::try_from_slice(&winning_ticket_account_info.data.borrow())?;
-
-    // Set the winner of the game
-    msg!("winner: {:?}", winning_ticket.owner);
-    game.winner = Some(winning_ticket.owner);
+    // Save the winning ticket of the game
+    game.winner_ticket = Some(winning_ticket_pda);
 
     Ok(())
 }

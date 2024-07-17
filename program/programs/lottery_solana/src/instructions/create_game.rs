@@ -29,7 +29,7 @@ pub fn _create_game(ctx: Context<CreateGame>, end_time: i64) -> Result<()> {
     game.end_time = end_time;
     game.prize_pool = 0; // Start with an empty prize pool
     game.total_tickets = 0; // No tickets sold initially
-    game.winner = None;
+    game.winner_ticket = None;
     game.winner_withdrawn = false;
 
     // Increment the game count for the creator
