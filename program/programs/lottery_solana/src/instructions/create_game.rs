@@ -66,7 +66,7 @@ pub struct CreateGame<'info> {
         seeds = [
             GAME_ACCOUNT_SEED.as_bytes(),
             creator.key().as_ref(),
-            &creator_acc.game_count.to_ne_bytes()
+            &creator_acc.game_count.to_be_bytes()
         ],
         bump
     )]

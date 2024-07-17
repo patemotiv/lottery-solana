@@ -60,11 +60,11 @@ pub struct BuyTicket<'info> {
     #[account(
         init,
         payer = player, 
-        space = size_of::<Ticket>() + 8,
+        space = 8 + size_of::<Ticket>(),
         seeds = [
             TICKET_ACCOUNT_SEED.as_bytes(),
             game.key().as_ref(),
-            &game.total_tickets.to_ne_bytes()
+            &game.total_tickets.to_be_bytes()
         ], 
         constraint = player.to_account_info().lamports() >= TICKET_PRICE,
         bump,

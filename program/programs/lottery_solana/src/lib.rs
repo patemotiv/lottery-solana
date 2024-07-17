@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("HsKw5odRfszH8rUUU5RYzxBS3KwSG3Yiy3BxX67GcJb2");
+declare_id!("UFHtfH5b3QXDUSNwPnQyDBEkAJnd2nqWLZ9dKEgwbuL");
 
 #[program]
 pub mod lottery_solana {
